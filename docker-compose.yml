@@ -1,0 +1,94 @@
+version: "3.3"
+services:
+  mysqlservice:
+    image: mysql:5.5
+    ports:
+      - 3306:3306
+    container_name: mysql-container
+    network_mode: host
+    hostname: localhost
+    environment:
+      MYSQL_ROOT_PASSWORD: "root"
+      MYSQL_USERNAME: "root"
+      MYSQL_PASSWORD: "@Div2000"
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+      MYSQL_DATABASE: userdb
+  mongodbservice:
+    image: mongo:latest
+    container_name: mongo-container
+    network_mode: host
+    hostname: localhost
+    ports:
+      - 27017:27017
+    environment:
+      MONGO_DATABASE: bookdb
+      
+  apigateway:
+    container_name: api-gateway
+    build: APIGateway/
+    hostname: localhost
+    network_mode: host
+    ports:
+      - 9009:9009
+    depends_on:
+      - mongodbservice
+    restart: always
+
+#   container for user service
+  loginservice:
+      build:
+        dockerfile: Dockerfile
+        context:  ./login
+      container_name: login-docker
+      network_mode: host
+      restart: always
+      ports:
+       - "8080:8080"
+      depends_on:
+        - databasemysql
+        
+#   container for favourite service
+  favoriteservice:
+      build: 
+        dockerfile: Dockerfile
+        context:  ./Favorite
+      container_name: favorite-docker
+      network_mode: host
+      restart: always
+      ports:
+       - "8085:8085"
+      depends_on:
+        - databasemongo
+
+#   container for recommendation service
+  recommendedservice:
+      build: 
+        dockerfile: Dockerfile
+        context:  ./Recommended
+      container_name: recommended-docker
+      network_mode: host
+      restart: always
+      ports:
+       - "9000:9000"
+      depends_on:
+        - databasemongo
+        
+        
+        
+# container for front end 
+  angular-frontend:
+    build:
+       dockerfile: Dockerfile
+       context:  ./BookApp
+    container_name: angular-docker
+    network_mode: host
+    restart: always
+    ports:
+       - "8008:8008"
+    
+
+
+
+
+
+
