@@ -1,0 +1,55 @@
+server:
+  port: 9009
+
+spring:
+  application:
+    name: APIGateway
+  main:
+    web-application-type: reactive
+
+# spring.main.web-application-type=reactive
+eureka:
+  instance:
+    hostname: localhost
+
+cloud:
+  gateway:
+      default-filters:
+        - DedupeResponseHeader= Access-Control-Allow-Origin
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+
+            allowedOrigins:
+              - "http://localhost:4200"
+            allowedMethods: "*"
+            allowedHeaders: "*"
+
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
+  routes:
+    -id: Login
+    uri:
+      lb://Login
+    predicates:
+      -Path= /api/v1/**
+
+    -id: Favorite
+    uri:
+      lb://Favorite
+    predicates:
+      -Path= /api/v2/**
+
+    -id: Recommended
+    uri:
+      lb://Recommended
+    predicates:
+      -Path= /api/v3/**
+
+    #   # -id: Login
+    #   # uri:
+    #   #     lb://Login
+    #   # predicates:
+    #   # -PATH= /api/v1/**
